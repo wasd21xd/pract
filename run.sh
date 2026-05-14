@@ -15,7 +15,7 @@ sleep 3
 
 # Запуск фронтенда в фоне
 echo "⚛️  Запуск фронтенда на порту 5173..."
-cd ../frontend && npm run dev &
+cd /Users/wasd/WebstormProjects/untitled50/practicee/frontend && npm run dev &
 FRONTEND_PID=$!
 
 echo ""

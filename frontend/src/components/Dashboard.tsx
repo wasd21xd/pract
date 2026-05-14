@@ -7,7 +7,14 @@ import './Dashboard.css'
 
 function Dashboard() {
   const { user, logout } = useStore()
-  const [activeTab, setActiveTab] = useState<'tasks' | 'team' | 'chat'>('tasks')
+  const [activeTab, setActiveTab] = useState<'tasks' | 'team' | 'chat'>(
+    (localStorage.getItem('activeTab') as 'tasks' | 'team' | 'chat') || 'tasks'
+  )
+
+  const handleTabChange = (tab: 'tasks' | 'team' | 'chat') => {
+    setActiveTab(tab)
+    localStorage.setItem('activeTab', tab)
+  }
 
   return (
     <div className="dashboard">
@@ -20,28 +27,26 @@ function Dashboard() {
           </div>
         </div>
       </header>
-
       <nav className="dashboard-nav">
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'tasks' ? 'active' : ''}`}
-          onClick={() => setActiveTab('tasks')}
+          onClick={() => handleTabChange('tasks')}
         >
           📋 Задачи
         </button>
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'team' ? 'active' : ''}`}
-          onClick={() => setActiveTab('team')}
+          onClick={() => handleTabChange('team')}
         >
           👥 Команда
         </button>
-        <button 
+        <button
           className={`nav-btn ${activeTab === 'chat' ? 'active' : ''}`}
-          onClick={() => setActiveTab('chat')}
+          onClick={() => handleTabChange('chat')}
         >
           💬 Чат
         </button>
       </nav>
-
       <main className="dashboard-content">
         {activeTab === 'tasks' && <TaskBoard />}
         {activeTab === 'team' && <TeamPanel />}

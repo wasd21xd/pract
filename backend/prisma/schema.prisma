@@ -49,8 +49,8 @@ model Task {
 
 model ChatMessage {
   id        String     @id @default(cuid())
-  taskId    String
-  task      Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId    String?
+  task      Task?      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   message   String

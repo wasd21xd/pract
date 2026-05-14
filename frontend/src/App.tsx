@@ -1,121 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useRef } from 'react'
+import { useStore } from './store'
+import Auth from './components/Auth'
+import Dashboard from './components/Dashboard'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { user, fetchUser, fetchTeam, addMessage, setMessages, setTasks } = useStore()
+  const wsRef = useRef<WebSocket | null>(null)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token && !user) {
+      fetchUser()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
+
+    // WebSocket — живёт на уровне App
+    const token = localStorage.getItem('token')
+    const ws = new WebSocket(`ws://localhost:3000/ws?token=${token}`)
+    wsRef.current = ws
+    ;(window as any).__appWs = ws
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        if (data.type === 'message' && data.data?.message?.taskId) {
+          addMessage(data.data.message)
+        }
+        if (data.type === 'team_update') {
+          fetchTeam()
+        }
+      } catch (err) {
+        console.error('WS parse error:', err)
+      }
+    }
+
+    // Загрузка сообщений
+    const token2 = localStorage.getItem("token")
+    fetch("/api/chat", { headers: { "Authorization": `Bearer ${token2}` } })
+      .then(r => r.json()).then(msgs => setMessages(msgs)).catch(() => {})
+
+    // Polling команды каждые 5 секунд
+    // Загрузка задач
+    if (user?.teamId) {
+      const token3 = localStorage.getItem("token")
+      fetch("/api/tasks", { headers: { "Authorization": `Bearer ${token3}` } })
+        .then(r => r.json()).then(tasks => setTasks(tasks)).catch(() => {})
+    }
+
+    const interval = setInterval(() => {
+      if (user?.teamId) {
+        fetchTeam()
+        const t = localStorage.getItem("token")
+        fetch("/api/tasks", { headers: { "Authorization": `Bearer ${t}` } })
+          .then(r => r.json()).then(d => setTasks(d)).catch(() => {})
+      }
+    }, 5000)
+
+    return () => {
+      ws.close()
+      clearInterval(interval)
+    }
+  }, [user])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <div>
+      {user ? <Dashboard /> : <Auth />}
+    </div>
   )
 }
 

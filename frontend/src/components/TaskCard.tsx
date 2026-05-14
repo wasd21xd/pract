@@ -38,8 +38,16 @@ function TaskCard({ task }: TaskCardProps) {
     }
   }
 
-  const handleStatusChange = (newStatus: 'todo' | 'in-progress' | 'done') => {
-    updateTask(task.id, { status: newStatus })
+  const handleStatusChange = async (newStatus: 'todo' | 'in-progress' | 'done') => {
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus })
+      })
+      if (res.ok) updateTask(task.id, { status: newStatus })
+    } catch (err) { console.error("Failed to update status:", err) }
   }
 
   const handleSave = async () => {

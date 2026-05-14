@@ -1,6 +1,6 @@
 import express, { Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { AuthRequest } from '../index'
+import { AuthRequest } from '../middleware'
 
 const router = express.Router()
 const prisma = new PrismaClient()

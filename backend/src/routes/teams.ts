@@ -1,6 +1,6 @@
 import express, { Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { AuthRequest } from '../index'
+import { AuthRequest } from '../middleware'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -136,3 +136,17 @@ router.post('/join', async (req: AuthRequest, res: Response) => {
 })
 
 export default router
+
+// Leave team
+router.post('/leave', async (req: AuthRequest, res: Response) => {
+  try {
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { teamId: null }
+    })
+    res.json({ message: 'Left team successfully' })
+  } catch (err) {
+    console.error('Leave team error:', err)
+    res.status(500).json({ message: 'Failed to leave team' })
+  }
+})

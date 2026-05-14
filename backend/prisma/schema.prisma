@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String
+  password  String
+  teamId    String?
+  team      Team?      @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  tasks     Task[]     @relation("assignedTasks")
+  messages  ChatMessage[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Team {
+  id        String     @id @default(cuid())
+  name      String
+  code      String     @unique
+  members   User[]
+  tasks     Task[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      String     @default("todo")
+  teamId      String
+  team        Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignedToId String?
+  assignedTo  User?      @relation("assignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages    ChatMessage[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model ChatMessage {
+  id        String     @id @default(cuid())
+  taskId    String
+  task      Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime   @default(now())
+}

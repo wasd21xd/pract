@@ -109,8 +109,8 @@ function TaskCard({ task }: TaskCardProps) {
           </div>
 
           <div className="task-actions">
-            <button className="edit-btn" onClick={() => setIsEditing(true)}>✏️</button>
-            <button className="delete-btn" onClick={handleDelete}>🗑️</button>
+            <button className="edit-btn" onClick={() => setIsEditing(true)}>Редактировать</button>
+            <button className="delete-btn" onClick={handleDelete}>Удалить</button>
           </div>
         </>
       )}

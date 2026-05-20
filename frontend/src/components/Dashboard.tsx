@@ -32,19 +32,19 @@ function Dashboard() {
           className={`nav-btn ${activeTab === 'tasks' ? 'active' : ''}`}
           onClick={() => handleTabChange('tasks')}
         >
-          📋 Задачи
+          Задачи
         </button>
         <button
           className={`nav-btn ${activeTab === 'team' ? 'active' : ''}`}
           onClick={() => handleTabChange('team')}
         >
-          👥 Команда
+          Команда
         </button>
         <button
           className={`nav-btn ${activeTab === 'chat' ? 'active' : ''}`}
           onClick={() => handleTabChange('chat')}
         >
-          💬 Чат
+          Чат
         </button>
       </nav>
       <main className="dashboard-content">

@@ -130,7 +130,7 @@ function TeamPanel() {
               <div className="code-box">
                 <strong>{team.code}</strong>
                 <button onClick={handleCopy} className="copy-btn">
-                  {copied ? '✅ Скопировано' : '📋 Копировать'}
+                  {copied ? 'Скопировано' : 'Копировать'}
                 </button>
               </div>
             </div>
